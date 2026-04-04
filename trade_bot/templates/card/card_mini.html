@@ -1,0 +1,28 @@
+<div class="col">
+    <div class="card shadow-sm bg-light">
+
+
+
+
+            <div class="card-body">
+              
+              <div class="d-flex flex-column align-items-center bg-light">
+                <a href="https://google.com" class="stretched-link" title="подробная информация"></a>
+
+                <h3 class="card-title">Индекс {{element.0.1}}</h3>
+                <p class="card-text">Текушее значение <span class="badge bg-secondary">{{element.4.1}}</span></p>
+                <p class="card-text">Изменение к открытию 
+                    <span class="position-relative d-inline-block p-3 border badge {% if element.7.1 > 0 %}bg-success{% elif element.7.1 < 0 %}bg-danger{% else %}bg-secondary{% endif %}">{{element.7.1}}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill {% if element.6.1 > 0 %}bg-success{% elif element.6.1 < 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                    {{element.6.1 }}%
+                    <span class="visually-hidden">Изменение цены в процентах</span>
+                    </span>
+                </span></p>
+
+
+                
+                
+              </div>
+            </div>
+    </div>
+</div>

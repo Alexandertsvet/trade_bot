@@ -2,5 +2,98 @@
 {% load static %}
 {% block content %}
 
+<div class="card shadow-sm">
+  <h1 class="card-text p-3">ИНДЕКСЫ</h1>
+  <div class="album py-1">
+    <div class="container">
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        {% for element in task_group %}
+          {% include 'card/card_mini_celery.html' %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function addClassByValue(element, value) {
+ 
+      if (value < 0) {
+          element.classList.add('bg-danger');
+      } else if (value > 0) {
+          element.classList.add('bg-success');
+      } else {
+          element.classList.add('bg-secondary');
+      }; 
+  }
+
+ document.addEventListener("DOMContentLoaded", () => {
+        const elements = document.querySelectorAll('#id-index');
+
+        elements.forEach(function (element) {
+              // Выносим логику опроса в отдельную функцию, которая "знает" свой элемент
+              const pollStatus = () => {
+                  const taskId = element.getAttribute('data-id');
+                  const indexName = element.querySelector('h3');
+                  const indexCurentVal = element.querySelector('#id-index-curent-val');
+
+                  const indexLastChangeOpen= element.querySelector('#id-index-change-open');
+                  const indexLastChangeOpenPercent = element.querySelector('#id-index-change-open-percent');
+
+                  const indexLastChangeOpenvalue = element.querySelector('#id-index-change-open-value');
+                  const indexLastChangeOpenPercentValue = element.querySelector('#id-index-change-open-percent-value');
+
+
+                  if (!taskId) return;
+
+                  fetch(`/task-status/${taskId}/`)
+                      .then(response => response.json())
+                      .then(data => {
+                          if (data.status === 'PROGRESS') {
+                              // Задача в процессе — повторяем через 1 сек
+                              setTimeout(pollStatus, 1000);
+                          } 
+                          else if (data.status === 'SUCCESS') {
+                              // Успех — выводим результат и ПРЕКРАЩАЕМ опрос
+                              console.log(`Результат задачи ${taskId}:`, data.status);
+                              // Здесь можно обновить DOM именно этого элемента
+                             
+                              indexName.innerText = "Индекс "+data.data[0][1];
+                              indexCurentVal.innerText = data.data[4][1];
+                         
+                             
+                              addClassByValue(indexLastChangeOpen, data.data[7][1])
+                              addClassByValue(indexLastChangeOpenPercent, data.data[6][1])
+
+                              indexLastChangeOpenvalue.innerText = data.data[7][1];
+                              indexLastChangeOpenPercentValue.innerText = data.data[6][1]+'%';
+                              
+
+                          } 
+                          else if (data.status === 'FAILURE') {
+                              console.error(`Задача ${taskId} провалена`);
+                          }
+                          else {
+                              // Для PENDING или других состояний — опрос через 2 сек
+                              setTimeout(pollStatus, 2000);
+                          }
+                      })
+                      .catch(error => {
+                          console.error('Ошибка запроса:', error);
+                          // В случае сетевой ошибки можно попробовать еще раз через 5 сек
+                          setTimeout(pollStatus, 5000);
+                      });
+              };
+              // Запускаем первый опрос для текущего элемента
+              pollStatus();
+          });
+
+
+ })
+</script>
+
+
+
 
 {% endblock %}
