@@ -42,6 +42,10 @@ http://127.0.0.1:8000/t_invest/accaunt/add/
 
 docker exec trade_bot-web-1 python manage.py makemigrations
 
+docker exec trade_bot-web-1 python3 manage.py create_db
+
+python3 manage.py download_history --secid gazp --from 2026 --till 2026
+
 docker exec trade_bot-web-1 python3 manage.py load_fin_instrument
 загрузка инструмкентов доступных для торговли
 

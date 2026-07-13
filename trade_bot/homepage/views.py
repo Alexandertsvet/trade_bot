@@ -9,6 +9,8 @@ from django.views import View
 from homepage.tasks import get_data_moex_index
 from trade_bot.settings import client_clickhouse
 
+import pandas as pd
+
 
 class HomeView(View):
     """Главная страница"""
@@ -30,6 +32,7 @@ class HomeView(View):
         messages.info(self.request, "Домашняя страница!")
         # -----------------------------------
         df = client_clickhouse.get_latest_window(secid="GAZP", window_size=200)
+        df["tradetime"] = pd.to_datetime(df["tradetime"], errors="coerce")
         df["time"] = df["tradetime"].dt.tz_localize(None)
         df["time"] = df["time"].astype("datetime64[s]").astype("int64")
         rename_dict = {

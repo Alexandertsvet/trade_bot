@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 class Command(BaseCommand):
     """
-    python3 manage.py download_data --secid gazp --from 2026 --till 2026
+    python3 manage.py download_history --secid gazp --from 2026 --till 2026
     """
 
     help = "Загрузка исторических данных с 2020 года"

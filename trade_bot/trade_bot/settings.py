@@ -277,8 +277,6 @@ EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = BASE_DIR / "email"
 DEFAULT_FROM_EMAIL = "tb@mail.ru"
 
-# Инициализируем ClickHouse (убедитесь, что внутри класса используется os.getenv('CLICKHOUSE_HOST'))
 client_clickhouse = ClickHouseProcessor()
-
 print(client_clickhouse)
 print(client_clickhouse.execute("SELECT version();"))

@@ -22,6 +22,8 @@ from t_invest.functions import save_tinkoff_portfolio
 from t_invest.models import FavoriteInstrument, TinkoffAccaunt
 from trade_bot.settings import client_clickhouse
 
+import pandas as pd
+
 logger = logging.getLogger(__name__)
 
 
@@ -211,7 +213,7 @@ class TraidingTerminal(LoginRequiredMixin, View):
         """Этот метод перехватывает GET-запрос и рендерит страницу"""
         accaunt = self.get_queryset()
         df = client_clickhouse.get_latest_window(secid="GAZP", window_size=200)
-
+        df["tradetime"] = pd.to_datetime(df["tradetime"], errors="coerce")
         df["time"] = df["tradetime"].dt.tz_localize(None)
         df["time"] = df["time"].astype("datetime64[s]").astype("int64")
         rename_dict = {
