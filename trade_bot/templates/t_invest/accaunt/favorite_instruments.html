@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Избранные инструменты{% endblock %}
+{% block content %}
+
+
+    <div class="container my-4">
+
+        <div style="margin-bottom: 25px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <span style="font-size: 14px; color: #64748b; text-transform: uppercase; font-weight: 600; tracking: 0.05em;">Мои избранные инструменты</span>
+            <h2 style="margin: 5px 0 0 0; color: #0f172a; font-size: 24px;">Список отслеживаемых инструментов на основе данных T-Invest API.</h2>
+        </div>
+
+
+        {% if favorite_instruments %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Инструмент</th>
+                            <th scope="col" class="text-center">Тип</th>
+                            <th scope="col" class="text-center">Валюта</th>
+                            <th scope="col" class="text-end">Лот</th>
+                            <th scope="col" class="text-center">Доступность торгового API</th>
+                            <th scope="col" class="text-center">Маржинальность (L/S)</th>
+                            <th scope="col">Дата добавления</th>
+                            <th scope="col" class="text-center">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in favorite_instruments %}
+                            <tr id="instrument-row-{{ item.instrument.ticker }}">
+                                <!-- Основные данные инструмента -->
+                                <td>
+                                    <div class="fw-bold text-primary">{{ item.instrument.ticker }}</div>
+                                    <div class="text-dark fw-semibold" style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ item.instrument.name }}">
+                                        {{ item.instrument.name }}
+                                    </div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                        FIGI: {{ item.instrument.figi }} | Класс: {{ item.instrument.class_code }}
+                                    </small>
+                                </td>
+                                
+                                <!-- Тип инструмента в виде значка -->
+                                <td class="text-center">
+                                    <span class="badge 
+                                        {% if item.instrument.type == 'shares' %}bg-success
+                                        {% elif item.instrument.type == 'etf' %}bg-info text-dark
+                                        {% elif item.instrument.type == 'bond' %}bg-warning text-dark
+                                        {% elif item.instrument.type == 'currency' %}bg-primary
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ item.instrument.type }}
+                                    </span>
+                                </td>
+                                
+                                <!-- Валюта торгов -->
+                                <td class="text-center text-uppercase fw-bold text-muted">
+                                    {{ item.instrument.currency }}
+                                </td>
+                                
+                                <!-- Торговый лот -->
+                                <td class="text-end font-monospace">
+                                    {{ item.instrument.lot }}
+                                </td>
+                                
+                                <!-- Флаги доступности (Красивые иконки) -->
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <span class="badge {% if item.instrument.api_trade_available_flag %}bg-success{% else %}bg-outline-secondary text-muted border{% endif %}" title="Торговля через API">API</span>
+                                        <span class="badge {% if item.instrument.buy_available_flag %}bg-outline-success border border-success text-success{% else %}bg-light text-muted{% endif %}" title="Покупка">Бай</span>
+                                        <span class="badge {% if item.instrument.sell_available_flag %}bg-outline-danger border border-danger text-danger{% else %}bg-light text-muted{% endif %}" title="Продажа">Селл</span>
+                                    </div>
+                                    <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">
+                                        Статус: {{ item.instrument.trading_status }}
+                                    </small>
+                                </td>
+                                
+                                <!-- Рисковые коэффициенты лонг/шорт -->
+                                <td class="text-center font-monospace small">
+                                    <div>L: <span class="fw-semibold text-secondary">{{ item.instrument.klong|floatformat:4 }}</span></div>
+                                    <div>S: <span class="fw-semibold text-secondary">{{ item.instrument.kshort|floatformat:4 }}</span></div>
+                                    {% if item.instrument.short_enabled_flag %}
+                                        <span class="badge bg-light text-danger border border-danger p-1" style="font-size: 0.65rem;">Шорт разрешен</span>
+                                    {% endif %}
+                                </td>
+                                
+
+                                <td class="small text-nowrap">
+                                    {{ item.created_at|date:"d.m.Y" }}
+                                    <span class="text-muted d-block" style="font-size: 0.75rem;">{{ item.created_at|date:"H:i" }}</span>
+                                </td>
+                                
+                                <!-- Кнопка удаления -->
+                                <td class="text-center">
+                                  
+                                    <form action="{% url 't_invest:delete_favorite' item.instrument.ticker %}" method="post" class="delete-instrument-form" data-ticker="{{ item.instrument.ticker }}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Удалить</span>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="margin-bottom: 25px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <span style="font-size: 14px; color: #64748b; text-transform: uppercase; font-weight: 600; tracking: 0.05em;">У вас пока нет инструментов в избранном.</span>
+            </div>
+        {% endif %}
+    </div>
+
+
+
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteForms = document.querySelectorAll('.delete-instrument-form');
+    deleteForms.forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const ticker = this.getAttribute('data-ticker');
+            const url = this.getAttribute('action');
+            const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken 
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Ошибка сервера при удалении.');
+            })
+            .then(data => {
+                if (data.success) {
+                    const row = document.getElementById(`instrument-row-${ticker}`);
+                    if (row) {
+                        // Эффект плавного исчезновения строки перед удалением
+                        row.style.transition = 'all 0.5s ease';
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateX(20px)';
+                        
+                        setTimeout(() => {
+                            row.remove();
+                            const remainingRows = document.querySelectorAll('tbody tr');
+                            if (remainingRows.length === 0) {
+                                location.reload();
+                            }
+                        }, 500);
+                    }
+                } else {
+                    alert('Не удалось удалить инструмент: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при отправке запроса. Попробуйте позже.');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}
+

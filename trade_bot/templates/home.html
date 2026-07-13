@@ -2,6 +2,23 @@
 {% load static %}
 {% block content %}
 
+<div id="chart" style="height: 400px;"></div>
+
+
+
+<div class="card">
+
+<div class="card shadow-sm">
+  <h1 class="card-text p-3">ВРЕМЯ</h1>
+  <div class="album py-1">
+    <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+             {% include 'card/card_time.html' %}
+        </div>
+    </div>
+  </div>
+</div>
+
 <div class="card shadow-sm">
   <h1 class="card-text p-3">ИНДЕКСЫ</h1>
   <div class="album py-1">
@@ -15,9 +32,38 @@
   </div>
 </div>
 
+</div>
+
+
+<script src="https://unpkg.com/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"></script>
+
 
 <script>
-  function addClassByValue(element, value) {
+const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+    width: document.getElementById('chart').clientWidth,
+    height: 400,
+    timeScale: {
+        timeVisible: true, // ВКЛЮЧАЕТ отображение времени
+        secondsVisible: false,
+    },
+});
+// Исправленный метод для 4-й версии
+const candlestickSeries = chart.addCandlestickSeries(LightweightCharts.CandlestickSeries);
+
+// Данные передаем как обычно
+const data = {{ chart_data|safe }};
+if (Array.isArray(data)) {
+    candlestickSeries.setData(data);
+} else {
+    console.error("Ошибка: Данные должны быть массивом [], а пришло:", data);
+}
+candlestickSeries.setData(data);
+</script>
+
+
+<script>
+
+function addClassByValue(element, value) {
  
       if (value < 0) {
           element.classList.add('bg-danger');
@@ -32,7 +78,6 @@
         const elements = document.querySelectorAll('#id-index');
 
         elements.forEach(function (element) {
-              // Выносим логику опроса в отдельную функцию, которая "знает" свой элемент
               const pollStatus = () => {
                   const taskId = element.getAttribute('data-id');
                   const indexName = element.querySelector('h3');
@@ -86,14 +131,38 @@
                       });
               };
               // Запускаем первый опрос для текущего элемента
-              pollStatus();
+              pollStatus(); 
           });
 
 
  })
+
+    function updateDateTime() {
+        const element = document.getElementById('dynamic-clock-year');
+        const now = new Date();
+
+        // Форматируем дату: дд.мм.гггг
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+
+        // Форматируем время: чч:мм:сс
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        // Собираем всё вместе
+        const fullString = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+        
+        if (element.textContent !== fullString) {
+            element.textContent = fullString;
+        }
+    }
+
+    // Запускаем интервал
+    setInterval(updateDateTime, 1000);
+
+
+
 </script>
-
-
-
-
 {% endblock %}

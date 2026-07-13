@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="card">
+
+    <div class="p-5 mb-4 bg-light rounded-3">
+      <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Счет (T-Bank) Invest API</h1>
+        <p class="col-md-8 fs-4">Для добавление нового счета нажмите добавить.</p>
+        <a class="btn btn-outline-dark btn-lg" data-bs-toggle="tooltip" href="" title="Функция недоступна" onclick="return confirm('Функция добавления не реализована!')">ДОБАВИТЬ</a>
+      </div>
+    </div>
+
+    <div class="p-5">
+        {% for acc in accaunts %}
+
+        {% include 't_invest/accaunt/accaunt_card.html' %}
+       
+        {% empty %}
+        <h1 class="fw-bold">У вас нет открытого счета.</h1>
+        {% endfor %}
+    </div>
+
+</div>
+
+
+{% endblock %}

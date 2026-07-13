@@ -1,0 +1,12 @@
+<div  class="col">
+    <div class="card shadow-sm bg-light">
+            <div class="card-body">
+              <div class="d-flex flex-column align-items-center bg-light">
+                <h3 class="card-title">ВРЕМЯ МОСКОВСКОЕ</h3>
+                <p class="card-text">Сегодняшняя дата: <span class="badge bg-secondary display-6 fw-bold">{{ current_time|date:"d.m.Y" }}</span></p>
+                <small id="dynamic-clock-year" class="display-6 fw-bold">{{ current_time|date:"d.m.Y H:i:s" }}</small>
+              </div>
+            </div>
+    </div>
+</div>
+

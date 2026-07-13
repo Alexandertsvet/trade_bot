@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row g-5">
+  <div class="col-md-8">
+
+    <section class="vh-100">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-12 col-lg-12 col-xl-12">
+                <div class="card shadow-2-strong" style="border-radius: 1rem;">
+                <div class="card-body p-5 text-center">
+                    <h2>Редактировать профиль</h2>
+   
+                        <form method='post' enctype='multipart/form-data'>
+                            {% csrf_token %}
+
+                            <div data-mdb-input-init class="form-outline mb-4">
+                                <label for="{{ profile_form.first_name.id_for_label }}" class="">{{ profile_form.first_name.label }}</label>
+                                {{ profile_form.first_name }}
+                                {% if profile_form.first_name.errors %}
+                                {% for error in profile_form.first_name.errors %}
+                                    <div class="card-body">
+                                    <p class="text-danger">{{ error|escape }}</p>
+                                    </div>
+                                {% endfor %}                    
+                                {% endif %}
+                            </div>
+                            <div data-mdb-input-init class="form-outline mb-4">
+                                <label for="{{ profile_form.surname.id_for_label }}" class="">{{ profile_form.surname.label }}</label>
+                                {{ profile_form.surname }}
+                                {% if profile_form.surname.errors %}
+                                {% for error in profile_form.surname.errors %}
+                                    <div class="card-body">
+                                    <p class="text-danger">{{ error|escape }}</p>
+                                    </div>
+                                {% endfor %}                    
+                                {% endif %}
+                            </div>
+                            <div data-mdb-input-init class="form-outline mb-4">
+                                <label for="{{ profile_form.last_name.id_for_label }}" class="">{{ profile_form.last_name.label }}</label>
+                                {{ profile_form.last_name }}
+                                {% if profile_form.last_name.errors %}
+                                {% for error in profile_form.last_name.errors %}
+                                    <div class="card-body">
+                                    <p class="text-danger">{{ error|escape }}</p>
+                                    </div>
+                                {% endfor %}                    
+                                {% endif %}
+                            </div>
+                            <div data-mdb-input-init class="form-outline mb-4">
+                                <label for="{{ profile_form.date_of_birth.id_for_label }}" class="">{{ profile_form.date_of_birth.label }}</label>
+                                {{ profile_form.date_of_birth }}
+                                {% if profile_form.date_of_birth.errors %}
+                                {% for error in profile_form.date_of_birth.errors %}
+                                    <div class="card-body">
+                                    <p class="text-danger">{{ error|escape }}</p>
+                                    </div>
+                                {% endfor %}                    
+                                {% endif %}
+                            </div>
+
+                            <div data-mdb-input-init class="input-group mb-4">
+                                {{ profile_form.country_code }}
+                                {% if profile_form.country_code.errors %}
+                                {% for error in profile_form.country_code.errors %}
+                                    <div class="card-body">
+                                    <p class="text-danger">{{ error|escape }}</p>
+                                    </div>
+                                {% endfor %}                    
+                                {% endif %}
+                                <span class="input-group-text"> </span>
+                                {{ profile_form.phone_number }}
+                                {% if profile_form.phone_number.errors %}
+                                {% for error in profile_form.phone_number.errors %}
+                                    <div class="card-body">
+                                    <p class="text-danger">{{ error|escape }}</p>
+                                    </div>
+                                {% endfor %}                    
+                                {% endif %}
+                            </div>
+
+                            <div data-mdb-input-init class="form-outline mb-4">
+                               <label for="{{ profile_form.photo.id_for_label }}" class="">{{ profile_form.photo.label }}</label>
+                                {% if profile_form.instance.photo %}
+                                    <img class="rounded-circle" src="{{ profile_form.instance.photo.url }}" alt="photo profile user" height="50" width="50">
+                                {% endif %}
+
+                                {{ profile_form.photo }}
+
+                                {% if profile_form.photo.errors %}
+                                {% for error in profile_form.photo.errors %}
+                                    <div class="card-body">
+                                    <p class="text-danger">{{ error|escape }}</p>
+                                    </div>
+                                {% endfor %}                    
+                                {% endif %}
+                            </div>
+
+                            <button data-mdb-button-init data-mdb-ripple-init  class="btn btn-outline-primary btn-rounded btn-lg" type="submit">Сохранить изменения</button>
+                            
+                        </form>
+                        </form>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </section>
+
+    
+</div>
+
+
+
+{% include "registration/profile_aside.html" %}
+{% endblock %}

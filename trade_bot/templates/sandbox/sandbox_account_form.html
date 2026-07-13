@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+
+
+<div class="card shadow-5-strong" style="max-width: 500px; margin: 2rem auto; border-radius: 15px;">
+    <div class="card-body p-5">
+        <div class="text-center mb-4">
+            <!-- Добавим иконку для акцента -->
+            <h2 class="fw-bold text-uppercase">T-Bank</h2>
+            <p class="text-muted">Введите свой API KEY для песочницы.</p>
+            <p class="text-muted">инструкция для создания на сайте</p>
+            <a href="https://developer.tbank.ru/invest/intro/intro/token" title="инструкция создание API KEY">https://developer.tbank.ru/invest/intro/intro/token</a>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger shadow-sm py-2">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <div class="form-outline mb-4">
+                {{ form.access_token }}
+                <label class="form-label">API Токен</label>
+                
+                <!-- Ошибки конкретного поля (если есть) -->
+                {% if form.access_token.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.access_token.errors|striptags }}
+                    </div>
+                {% endif %}
+            </div>
+             <div class="form-outline mb-4">
+                {{ form.description }}
+                <label class="form-label">Краткое описание стратегии</label>
+                
+                <!-- Ошибки конкретного поля (если есть) -->
+                {% if form.description.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.description.errors|striptags }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="text-center">
+                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-dark btn-rounded btn-lg" type="submit">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

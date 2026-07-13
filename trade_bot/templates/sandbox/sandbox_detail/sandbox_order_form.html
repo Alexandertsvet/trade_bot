@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Выставить поручение в песочнице</h4>
+                </div>
+                <div class="card-body">
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Перебираем все поля формы -->
+                        {% for field in form %}
+                            
+                            <!-- Отдельная верстка для чекбокса маржинальной торговли -->
+                            {% if field.name == 'confirm_margin_trade' %}
+                                <div class="form-check form-switch mb-4">
+                                    {{ field }}
+                                    <label class="form-check-label" for="{{ field.id_for_label }}">
+                                        {{ field.label }}
+                                    </label>
+                                    {% if field.help_text %}
+                                        <div class="form-text">{{ field.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                            
+                            <!-- Стандартная верстка для текстовых полей и селектов -->
+                            {% else %}
+                                <div class="mb-3">
+                                    <label class="form-label" for="{{ field.id_for_label }}">
+                                        {{ field.label }}
+                                    </label>
+                                    
+                                    <!-- Рендерим поле с динамическим добавлением класса ошибки is-invalid -->
+                                    {{ field }}
+                                    
+                                    <!-- Вывод ошибок валидации конкретного поля -->
+                                    {% if field.errors %}
+                                        {% for error in field.errors %}
+                                            <div class="text-danger small mt-1">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    
+                                    <!-- Вывод подсказок из help_text модели -->
+                                    {% if field.help_text %}
+                                        <div class="form-text text-muted">{{ field.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            
+                        {% endfor %}
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Отправить поручение
+                            </button>
+                        </div>
+                        
+                    </form>
+                    
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+ 
+ 
+ <h1>Выставить новое поручение</h1>
+    
+    <form method="post">
+        <!-- Защита Django от подделки запросов (обязательно) -->
+        {% csrf_token %}
+        
+        <!-- Вывод ошибок, если форма не валидна -->
+        {% if form.errors %}
+            <p style="color: red;">Пожалуйста, исправьте ошибки ниже.</p>
+        {% endif %}
+
+        <!-- Рендеринг полей в виде понятной таблицы/списка -->
+        <table>
+            {{ form.as_table }}
+        </table>
+
+        <button type="submit">Отправить поручение</button>
+    </form>
+
+    {% endblock %}

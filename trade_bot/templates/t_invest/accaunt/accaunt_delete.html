@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4 text-center">
+                <div class="card-body p-4 p-md-5">
+                    
+
+                    <h2 class="fw-bold mb-3">Подтверждение удаления</h2>
+                    <p class="text-secondary mb-4">Вы действительно хотите удалить аккаунт?</p>
+
+                   
+                    <div class="bg-light rounded-3 p-3 mb-4 border-start border-dark border-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">ID аккаунта:</span>
+                            <span class="fw-bold font-monospace">{{ object.account_id }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Владелец:</span>
+                            <span class="fw-bold">{{ object.user.username }}</span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-dark border-0 rounded-3 d-flex align-items-start mb-4" role="alert">
+                        <i class="bi bi-info-circle-fill me-3 mt-1 fs-5"></i>
+                        <div>
+                            <strong class="d-block mb-1 text-dark">Внимание:</strong> 
+                            Аккаунт будет окончательно закрыт в системе Tinkoff Invest API. Все виртуальные активы будут аннулированы.
+                        </div>
+                    </div>
+
+            
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-outline-dark btn-lg py-3 rounded-1 text-uppercase fw-bold tracking-wider">
+                                <i class="bi bi-check2-circle me-2"></i>Да, удалить и закрыть
+                            </button>
+                            <a href="{% url 't_invest:accaunt_list' %}" class="btn btn-outline-dark btn-lg py-3 rounded-1 text-uppercase fw-bold tracking-wider border-0">
+                                Вернуться назад
+                            </a>
+                        </div>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}

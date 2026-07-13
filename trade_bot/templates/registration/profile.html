@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row g-5">
+  <div class="col-md-8">
+     <section class="vh-100">
+        <div class="container py-5 h-100">
+          <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-12 col-lg-12 col-xl-12">
+
+              <div class="card shadow-2-strong" style="border-radius: 1rem;">
+                <div class="card-body">
+                    {% if profile.photo %}
+                      <img class="rounded-circle" src="{{ profile.photo.url }}" alt="photo profile user" height="50" width="50">
+                    {% endif %}
+                    <hr>
+                    <div class="card">
+                      <ul class="list-group list-group-flush">
+                        <li class="list-group-item fst-italic">Профайл пользователя: {{user}}</li>
+                        <li class="list-group-item fst-italic">Имя: {{profile.first_name}}</li>
+                        <li class="list-group-item fst-italic">Отчество: {{profile.surname}}</li>
+                        <li class="list-group-item fst-italic">Фамилия: {{profile.last_name}}</li>
+                        <li class="list-group-item fst-italic">Дата рождения: {{profile.date_of_birth}}</li>
+                        <li class="list-group-item fst-italic">Телефон: {{profile.country_code}} {{profile.phone_number}}</li>
+                      </ul>
+                    </div>
+                      <ul class="list-group list-group-flush">
+                        <li class="list-group-item fst-italic">Страна: {{job.country}} </li>
+                        <li class="list-group-item fst-italic">Город: {{job.town}}</li>
+                        <li class="list-group-item fst-italic">РСЦ: {{job.RVC}}</li>
+                        <li class="list-group-item fst-italic">ПСО: {{job.PVD}}</li>
+                        <li class="list-group-item fst-italic">Название медицинского учреждения: {{job.medical_organization}}</li>
+                      </ul>
+                    <hr>
+                    <div class="d-flex gap-3">
+                      <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover px-4" method='post' href="{% url 'users:profile_edit' user.username %}">Редактировать рофиль</a>
+                      <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover px-4" method='post' href="{% url 'users:job_edit' user.username %}">Редактировать место работы</a>
+                    </div>
+                    <hr>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+     </section>
+
+    <div class="nav-scroller">
+    <nav class="nav nav-underline justify-content-center">
+        <a class="nav-item nav-link link-body-emphasis" method='post' href="{% url 'users:profile_edit' user.username %}">Редактировать рофиль</a>
+        <a class="nav-item nav-link link-body-emphasis" method='post' href="{% url 'users:job_edit' user.username %}">Редактировать место работы</a>
+        <a class="nav-item nav-link link-body-emphasis" href="#">...</a>
+    </nav>
+    </div>
+    <hr>
+    
+    
+</div>
+
+
+
+
+{% include "registration/profile_aside.html" %}
+{% endblock %}

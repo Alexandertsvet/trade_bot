@@ -1,0 +1,239 @@
+
+<div class="col-md-12 mb-4">
+    <!-- Добавлена тень (shadow-sm), более выразительные отступы (py-5 px-4) и плавный переход -->
+    <div class="h-100 p-5 bg-white border-0 shadow-sm rounded-4 position-relative overflow-hidden">
+
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+            <div>
+                <!-- Улучшенная типографика: уменьшенный заголовок и акцент на ID -->
+                <p class="text-uppercase fw-bold text-muted small mb-1 tracking-wider">Ваш счет</p>
+                <h2 class="display-6 fw-bold text-dark mb-0">
+                    <span class="text-black">ID </span>{{ acc.account_id }}
+                </h2>
+                <h2 class="display-6 fw-bold text-dark mb-0">
+                    <span class="text-black">Описание: </span>{{ acc.description }}
+                </h2>
+                <h2 class="display-6 fw-bold text-dark mb-0">
+                    <span class="text-black">дата создания: </span>{{ acc.created_at }}
+                </h2>
+            </div>
+            <div>
+                <div class="d-flex flex-column gap-2" style="max-width: 280px; width: 100%;">
+                    <!-- Форма «Обновить портфолио» -->
+                    <form action="{% url 't_invest:accaunt_portfolio_update' acc.pk %}" method="post" class="w-100">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-dark w-100 py-25 text-uppercase fw-bold" style="font-size: 0.85rem; letter-spacing: 1px;">
+                            <i class="bi bi-arrow-clockwise me-2 text-uppercase fw-bold"></i>Обновить портфолио
+                        </button>
+                    </form>
+
+                    <!-- Первая кнопка «Удалить» -->
+                    <a class="btn btn-outline-danger w-100 py-25 text-uppercase fw-bold" style="font-size: 0.85rem; letter-spacing: 1px;"
+                    href="{% url 't_invest:accaunt_delete' acc.pk %}">
+                        <i class="bi bi-trash3 me-2"></i>Удалить
+                    </a>
+
+                    <a class="btn btn-outline-dark w-100 py-25 text-uppercase fw-bold" style="font-size: 0.85rem; letter-spacing: 1px;"
+                        href="{% url 't_invest:trading_operation' acc.pk %}">
+                        <i class="bi bi-graph-up"></i></i>ТОРГОВЫЕ ОПЕРАЦИИ
+                    </a>
+
+                    <a class="btn btn-outline-dark w-100 py-25 text-uppercase fw-bold" style="font-size: 0.85rem; letter-spacing: 1px;"
+                        href="{% url 't_invest:favorite_instruments' acc.pk %}">
+                        <i class="bi bi-star-fill"></i>ИЗБРАННЫЕ ИНСТРУМЕНТЫ
+                    </a>
+
+            
+                </div>
+            </div>
+        </div>
+
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+            <div>
+                <div class="mt-4 pt-4">
+                    <p class="text-uppercase fw-bold text-muted small mb-1 tracking-wider">БАЛАНС</p>
+                    <div class="d-flex flex-wrap gap-5">
+                            <p>{{ acc.portfolio.total_amount_portfolio|floatformat:2 }} рублей.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if acc.portfolio %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr class="table-dark">
+                <th>Категория актива</th>
+                <th class="text-end">Стоимость (значение)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {# 1. ВАЛЮТА #}
+            <tr>
+                <td><strong>Валюта (Кэш)</strong></td>
+                <td class="text-end">{{ acc.portfolio.total_amount_currencies|floatformat:2 }}</td>
+            </tr>
+            
+            {# 2. АКЦИИ #}
+            <tr>
+                <td><strong>Акции</strong></td>
+                <td class="text-end">{{ acc.portfolio.total_amount_shares|floatformat:2 }}</td>
+            </tr>
+
+            {# 3. ОБЛИГАЦИИ #}
+            <tr>
+                <td><strong>Облигации</strong></td>
+                <td class="text-end">{{ acc.portfolio.total_amount_bonds|floatformat:2 }}</td>
+            </tr>
+
+            {# 4. ETF #}
+            <tr>
+                <td><strong>Фонды (ETF)</strong></td>
+                <td class="text-end">{{ acc.portfolio.total_amount_etf|floatformat:2 }}</td>
+            </tr>
+
+            {# 5. ФЬЮЧЕРСЫ #}
+            <tr>
+                <td><strong>Фьючерсы</strong></td>
+                <td class="text-end">{{ acc.portfolio.total_amount_futures|floatformat:2 }}</td>
+            </tr>
+
+            {# 6. ОПЦИОНЫ #}
+            <tr>
+                <td><strong>Опционы</strong></td>
+                <td class="text-end">{{ acc.portfolio.total_amount_options|floatformat:2 }}</td>
+            </tr>
+
+            {# 7. СТРУКТУРНЫЕ ПРОДУКТЫ #}
+            <tr>
+                <td><strong>Структурные продукты</strong></td>
+                <td class="text-end">{{ acc.portfolio.total_amount_sp|floatformat:2 }}</td>
+            </tr>
+
+            {# 8. ЦФА #}
+            <tr>
+                <td><strong>Цифровые финансовые активы (ЦФА)</strong></td>
+                <td class="text-end">{{ acc.portfolio.total_amount_dfa|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+        <tfoot class="table-group-divider fw-bold">
+            {# ИТОГО #}
+            <tr class="table-secondary">
+                <td>ИТОГО ПОРТФЕЛЬ</td>
+                <td class="text-end text-primary">{{ acc.portfolio.total_amount_portfolio|floatformat:2 }}</td>
+            </tr>
+            {# ДОХОДНОСТЬ (Опциональный информационный блок) #}
+            <tr class="table-light fw-normal text-muted fs-7">
+                <td>Ожидаемая доходность</td>
+                <td class="text-end {% if acc.portfolio.expected_yield >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ acc.portfolio.expected_yield|floatformat:2 }}
+                </td>
+            </tr>
+            <tr class="table-light fw-normal text-muted fs-7">
+                <td>Дневная доходность</td>
+                <td class="text-end {% if acc.portfolio.daily_yield >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ acc.portfolio.daily_yield|floatformat:2 }} ({{ acc.portfolio.daily_yield_relative|floatformat:2 }}%)
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    <div class="text-end text-muted small px-2">
+        Данные обновлены: {{ acc.portfolio.updated_at|date:"d.m.Y H:i" }}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning py-2" role="alert">
+    Данные портфеля для аккаунта {{ acc.account_id }} еще не синхронизированы.
+</div>
+{% endif %}
+
+
+{% if acc.portfolio and acc.portfolio.positions.all %}
+<div class="mt-4">
+    <h5 class="mb-3 text-secondary">Состав портфеля (Позиции)</h5>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Инструмент</th>
+                    <th class="text-end">Количество</th>
+                    <th class="text-end">Средняя цена</th>
+                    <th class="text-end">Текущая цена</th>
+                    <th class="text-end">Стоимость</th>
+                    <th class="text-end">Доходность</th>
+                    <th class="text-center">Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pos in acc.portfolio.positions.all %}
+                <tr>
+                    {# 1. ИНФОРМАЦИЯ ОБ ИНСТРУМЕНТЕ #}
+                    <td>
+                        <span class="fw-bold text-dark">
+                            {{ pos.instrument.ticker|default:pos.instrument.figi }}
+                        </span>
+                        {% if pos.instrument.name %}
+                            <br><small class="text-muted">{{ pos.instrument.name }}</small>
+                        {% endif %}
+                    </td>
+
+                    {# 2. КОЛИЧЕСТВО БУМАГ И ЛОТОВ #}
+                    <td class="text-end">
+                        {{ pos.quantity|floatformat:0 }} шт.
+                        <br><small class="text-muted">{{ pos.quantity_lots|floatformat:0 }} лот.</small>
+                    </td>
+
+                    {# 3. СРЕДНЯЯ ЦЕНА ВХОДА #}
+                    <td class="text-end text-nowrap">
+                        {{ pos.average_position_price|floatformat:2 }}
+                    </td>
+
+                    {# 4. ТЕКУЩАЯ РЫНОЧНАЯ ЦЕНА #}
+                    <td class="text-end text-nowrap fw-semibold">
+                        {{ pos.current_price|floatformat:2 }}
+                    </td>
+
+                    {# 5. ОБЩАЯ СТОИМОСТЬ ПОЗИЦИИ #}
+                    <td class="text-end text-nowrap {% if pos.total_position_profit_or_loss >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {# Перемножаем количество на текущую цену с помощью встроенного фильтра #}
+                        <strong>{{ pos.total_position_current_price|floatformat:2 }}</strong>
+                    </td>
+
+                    {# 6. ОЖИДАЕМАЯ ДОХОДНОСТЬ С ПОДСВЕТКОЙ #}
+                    <td class="text-end text-nowrap {% if pos.expected_yield >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {% if pos.expected_yield >= 0 %}+{% endif %}{{ pos.expected_yield|floatformat:2 }}
+                        <br><small class="text-muted">День: {{ pos.daily_yield|floatformat:2 }}</small>
+                    </td>
+
+                    {# 7. СТАТУС БЛОКИРОВКИ #}
+                    <td class="text-center">
+                        {% if pos.blocked %}
+                            <span class="badge bg-danger" data-bs-toggle="tooltip" title="Заблокировано лотов: {{ pos.blocked_lots }}">
+                                Блок
+                            </span>
+                        {% else %}
+                            <span class="badge bg-success">ОК</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% elif acc.portfolio %}
+<div class="alert alert-light text-center py-3 border" role="alert">
+    В портфеле аккаунта {{ acc.account_id }} пока нет открытых позиций.
+</div>
+{% endif %}
+
+
+
+
+
+

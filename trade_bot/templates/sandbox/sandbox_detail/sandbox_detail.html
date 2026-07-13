@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Аккаунт песочницы: {{ sandbox_account.account_id }}</h2>
+    <p>Пользователь: {{ sandbox_account.user.username }}</p>
+
+    <hr>
+
+    <!-- Блок: Валютные позиции (Деньги) -->
+    <h3 class="mt-4">Баланс (Валюта)</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Валюта</th>
+                <th>Всего</th>
+                <th>Заблокировано</th>
+                <th>Доступно</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cash in sandbox_account.money.all %}
+            <tr>
+                <td><strong>{{ cash.currency|upper }}</strong></td>
+                <td>{{ cash.balance|floatformat:2 }}</td>
+                <td>{{ cash.blocked|floatformat:2 }}</td>
+                <td>{{ cash.free_money|floatformat:2 }}</td> <!-- Используем @property из модели -->
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-muted">Нет денежных средств на аккаунте.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Блок: Ценные бумаги (Портфель) -->
+    <h3 class="mt-4">Ценные бумаги в портфеле</h3>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Тикер</th>
+                <th>FIGI</th>
+                <th>Тип инструмента</th>
+                <th>Баланс (шт.)</th>
+                <th>Заблокировано</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for position in sandbox_account.positions.all %}
+            <tr>
+                <td>
+                    <strong>{{ position.ticker }}</strong>
+                    {% if position.instrument_uid %}
+                        <small class="text-muted d-block">UID: {{ position.instrument_uid.uid }}</small>
+                    {% endif %}
+                </td>
+                <td><code class="text-dark">{{ position.figi }}</code></td>
+                <td><span class="badge bg-secondary">{{ position.instrument_type }}</span></td>
+                <td>{{ position.balance }}</td>
+                <td>{{ position.blocked }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-muted">В портфеле пока нет ценных бумаг.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="col-md-12 mb-4">
+    <div class="h-100 p-5 bg-white border-0 shadow-sm rounded-4 position-relative overflow-hidden">
+        <div class="position-absolute top-0 end-0 p-3 opacity-10">
+            <i class="bi bi-wallet2 h1"></i> 
+        </div>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+            <div>
+                {% if all_instruments %}
+               <form id="position-form" action="{% url 'user:add_position' sandbox_account.pk %}" method="post">
+                {% csrf_token %}
+                <h3>Добавьте инструмент (Рыночная заявка):</h3>
+                    <div class="form-group">
+                        <label for="instrument-search">Выберите или введите финансовый инструмент (TQBR):</label>
+                        <input type="text" name="instrument_display" id="instrument-search" class="form-control" list="instruments-list" placeholder="Начните вводить тикер или название..." autocomplete="off" required>
+                        <input type="hidden" name="instrument_id" id="instrument-id-hidden">
+                        <datalist id="instruments-list">
+                            {% for instrument in all_instruments %}
+                                <option data-id="{{ instrument.uid }}" 
+                                    data-ticker="{{ instrument.ticker }}"
+                                    data-name="{{ instrument.name }}"
+                                    data-lot="{{ instrument.lot }}"
+                                    data-currency="{{ instrument.currency }}"
+                                    data-class-code="{{ instrument.class_code }}"
+                                    data-min-price="{{ instrument.min_price_increment }}"
+                                    data-short="{{ instrument.short_enabled_flag }}"
+                                    value="{{ instrument.ticker }} — {{ instrument.name }}"
+                                ></option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label for="quantity">Количество лотов:</label>
+                        <input type="number" name="quantity" id="quantity" min="1" value="1" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-outline-dark mt-3">КУПИТЬ</button>
+
+                 </form>
+                {% else %}
+                <div class="bg-light px-3 py-2 rounded-3 d-flex flex-wrap align-items-center gap-2 border mb-2">
+                    <h3>Не удалось загрузить тикеты с базы данных.</h3>
+                    <h3>Выполните команду из терминала.</h3>
+                    <span class="badge bg-dark text-white font-monospace fs-6">python3 manage.py load_fin_instrument</span>
+                </div>
+                {% endif %}
+            </div>
+            <!--  -->
+
+
+            <div id="instrument-details-box" class="card mt-3 d-none" style="border: 1px solid #ced4da; border-radius: 0.25rem;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Спецификация инструмента</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted" style="width: 40%;">Название:</td>
+                                <td><strong id="info-name">—</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Тикер / Класс:</td>
+                                <td><span id="info-ticker" class="badge bg-secondary">—</span> <span id="info-class-code" class="text-muted">—</span></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Лотность (1 лот =):</td>
+                                <td><span id="info-lot">—</span> шт.</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Валюта торгов:</td>
+                                <td id="info-currency" class="text-uppercase">—</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Шаг цены:</td>
+                                <td id="info-min-price">—</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Короткие позиции (Шорт):</td>
+                                <td id="info-short">—</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">UID инструмента:</td>
+                                <td><small id="info-uid" class="text-monospace text-muted">—</small></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        
+            <!-- -->
+            <div>
+                <a class="btn btn-outline-danger btn-lg px-4 rounded-pill fw-semibold" 
+                   href=""
+                   onclick="return confirm('Вы уверены?')">
+                    <i class="bi bi-trash3 me-2"></i>Удалить
+                </a>
+            </div>
+            
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+            <div>
+                <!-- Улучшенная типографика: уменьшенный заголовок и акцент на ID -->
+                <p class="text-uppercase fw-bold text-muted small mb-1 tracking-wider">Ваш счет</p>
+                <h2 class="display-6 fw-bold text-dark mb-0">
+                    <span class="text-primary">#</span>
+                </h2>
+            </div>
+            
+        </div>
+
+    </div>
+</div>
+
+
+<form action="{% url 'user:add' sandbox_account.pk %}" method="post" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-dark btn-lg">ОРДЕР</button>
+</form>
+
+
+{% endblock %}
+{% block extra_js %}
+    <script src="{% static 'js/instruments_list/instrument_list.js' %}"></script>
+{% endblock %}

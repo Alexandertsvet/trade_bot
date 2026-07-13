@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Торговый Терминал{% endblock %}
+
+{% block content %}
+<!-- Основной контейнер: фон чисто белый (bg-white), текст черный (text-dark) -->
+<div class="container-fluid vh-100 d-flex flex-column text-dark bg-white p-2" style="font-family: monospace;">
+    
+    <!-- Верхняя панель (Тикер, Цена, Изменение) -->
+    <div class="row bg-light border border-dark border-opacity-10 rounded p-2 mb-2 g-0 align-items-center">
+        <div class="col-md-2">
+            <h4 class="mb-0 fw-bold text-dark">GAZP</h4>
+        </div>
+        <div class="col-md-2">
+            <small class="text-muted d-block">Текущая цена</small>
+            <span class="fs-5 fw-bold text-dark" id="ticker-price">64,250.00</span>
+        </div>
+        <div class="col-md-2">
+            <small class="text-muted d-block">Изменение 24ч</small>
+            <span class="text-dark fw-bold">+2.45%</span>
+        </div>
+        <div class="col-md-2">
+            <small class="text-muted d-block">Объем 24ч</small>
+            <span class="text-dark-50">1.2B GAZP</span>
+        </div>
+    </div>
+
+    <!-- Основная рабочая зона -->
+    <div class="row flex-grow-1 overflow-hidden g-2">
+        
+        <!-- ЛЕВАЯ КОЛОНКА: График и Сделки -->
+        <div class="col-lg-8 d-flex flex-column h-100">
+            <!-- График цены -->
+            <div class="bg-light border border-dark border-opacity-10 rounded p-2 mb-2 flex-grow-1" style="min-height: 300px; position: relative;">
+                <h6 class="text-muted border-bottom border-dark border-opacity-10 pb-1 mb-2">График цены</h6>
+                
+                <!-- Контейнер для виджета с учетом высоты заголовка -->
+                <div class="tradingview-widget-container" style="height: calc(100% - 35px); width: 100%;">
+                    <div id="tradingview_chart" style="height: 100%; width: 100%;"></div>
+                </div>
+            </div>
+            
+            <!-- История ордеров -->
+            <div class="bg-light border border-dark border-opacity-10 rounded p-2 text-nowrap overflow-auto" style="height: 200px;">
+                <ul class="nav nav-tabs border-dark border-opacity-10" id="terminalTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active btn-sm text-dark border-dark border-opacity-10 bg-white fw-bold" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button">Открытые ордера</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm text-muted border-transparent bg-transparent" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">История сделок</button>
+                    </li>
+                </ul>
+                <div class="tab-content pt-2" id="terminalTabsContent">
+                    <div class="tab-pane fade show active" id="orders" role="tabpanel">
+                        <table class="table table-light table-sm table-borderless table-hover small text-dark mb-0">
+                            <thead>
+                                <tr class="text-muted border-bottom border-dark border-opacity-10">
+                                    <th>Дата</th><th>Тип</th><th>Сторона</th><th>Цена</th><th>Количество</th><th>Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="align-middle">
+                                    <td>2026-06-26 21:00</td><td>Лимит</td><td>Покупка</td><td>64,100.00</td><td>0.05 GAZP</td>
+                                    <!-- Строгая черная кнопка отмены -->
+                                    <td><button class="btn btn-xs btn-outline-dark py-0 px-2" style="font-size: 0.75rem;">Отмена</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА: Стакан и Панель ордеров -->
+        <div class="col-lg-4 d-flex flex-column h-100 overflow-auto">
+            
+            <!-- Торговый стакан (Order Book) -->
+            <div class="bg-light border border-dark border-opacity-10 rounded p-2 mb-2 flex-grow-1 d-flex flex-column" style="min-height: 300px;">
+                <h6 class="text-muted border-bottom border-dark border-opacity-10 pb-1 mb-1">Биржевой стакан</h6>
+                
+                <!-- Аски (Продажи) -->
+                <div class="order-book-asks small flex-grow-1 overflow-hidden d-flex flex-column-reverse justify-content-end">
+                    <div class="d-flex justify-content-between text-muted px-1"><span>64,260.00</span><span>0.142</span></div>
+                    <div class="d-flex justify-content-between text-dark px-1"><span class="fw-bold">64,255.00</span><span class="text-muted">1.850</span></div>
+                </div>
+                
+                <!-- Спред -->
+                <div class="text-center my-1 bg-white py-1 border-top border-bottom border-dark border-opacity-10">
+                    <span class="fw-bold text-dark small">Спред: 5.00</span>
+                </div>
+                
+                <!-- Биды (Покупки) -->
+                <div class="order-book-bids small flex-grow-1 overflow-hidden">
+                    <div class="d-flex justify-content-between text-dark px-1"><span class="fw-bold">64,245.00</span><span class="text-muted">0.980</span></div>
+                    <div class="d-flex justify-content-between text-muted px-1"><span>64,240.00</span><span>2.114</span></div>
+                </div>
+            </div>
+
+            <!-- Форма ввода ордеров (Купить/Продать) -->
+            <div class="bg-light border border-dark border-opacity-10 rounded p-2" style="min-height: 280px;">
+                <!-- Контрастные вкладки -->
+                <nav class="nav nav-pills nav-fill mb-2" role="tablist">
+                    <button class="nav-link active bg-dark text-white me-1 btn-sm fw-bold" id="buy-pill" data-bs-toggle="pill" data-bs-target="#form-buy" type="button">Купить</button>
+                    <button class="nav-link bg-white text-dark btn-sm border border-dark border-opacity-10" id="sell-pill" data-bs-toggle="pill" data-bs-target="#form-sell" type="button">Продать</button>
+                </nav>
+                
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="form-buy">
+                        <form id="order-form" method="POST" action="">
+                            {% csrf_token %}
+                            <!-- Скрытое поле для передачи ID активного аккаунта Tinkoff из контекста Django -->
+                            <input type="hidden" name="account_id" value="{{ active_account.id }}">
+                            
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text bg-white text-muted border-dark border-opacity-20">Цена</span>
+                                <input type="number" step="0.01" class="form-control bg-white text-dark border-dark border-opacity-20 shadow-none" name="price" value="64250.00" required>
+                                <span class="input-group-text bg-white text-muted border-dark border-opacity-20">руб</span>
+                            </div>
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text bg-white text-muted border-dark border-opacity-20">Объем</span>
+                                <input type="number" step="0.0001" class="form-control bg-white text-dark border-dark border-opacity-20 shadow-none" name="amount" placeholder="0.00" required>
+                                <span class="input-group-text bg-white text-muted border-dark border-opacity-20">GAZP</span>
+                            </div>
+                            
+                            <!-- Строгий блок уведомлений (изначально пустой) -->
+                            <div id="form-message" class="small mb-2 fw-bold d-none"></div>
+
+                            <button type="submit" id="submit-btn" class="btn btn-dark btn-sm w-100 fw-bold mt-1">Разместить ордер</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+{% block scripts %}
+<!-- Подключаем только Lightweight Charts -->
+<script type="text/javascript" src="https://unpkg.com/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const rawData = JSON.parse("{{ data|escapejs }}");
+    console.log("Первая свеча:", rawData[0]);
+
+
+    const chartContainer = document.getElementById('tradingview_chart');
+    if (!chartContainer) return;
+
+    // Инициализация графика внутри вашего контейнера
+    const chart = LightweightCharts.createChart(chartContainer, {
+        width: chartContainer.clientWidth,
+        height: chartContainer.clientHeight || 350, // берет высоту родителя или 350px
+        layout: {
+            background: { type: LightweightCharts.ColorType.Solid, color: '#f8f9fa' },
+            textColor: '#000000',
+        },
+        grid: {
+            vertLines: { color: '#e0e0e0' },
+            horzLines: { color: '#e0e0e0' },
+        },
+        timeScale: {
+            timeVisible: true,
+            secondsVisible: false,
+        },
+    });
+
+    // Создаем серию японских свечей в журнальном стиле (черно-белые)
+    const candlestickSeries = chart.addCandlestickSeries({
+        upColor: '#ffffff',
+        downColor: '#000000',
+        borderUpColor: '#000000',
+        borderDownColor: '#000000',
+        wickUpColor: '#000000',
+        wickDownColor: '#000000',
+    });
+
+
+    candlestickSeries.setData(rawData);
+
+
+
+    // Автоматическое изменение размера при изменении окна браузера
+    window.addEventListener('resize', () => {
+        chart.resize(chartContainer.clientWidth, chartContainer.clientHeight || 350);
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock %}
+
+

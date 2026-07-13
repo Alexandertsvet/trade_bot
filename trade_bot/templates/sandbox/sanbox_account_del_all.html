@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <!-- Карточка с акцентом на предупреждение -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-danger bg-gradient py-3">
+                    <h4 class="card-title text-white mb-0 fw-bold text-center">Подтверждение удаления</h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div class="display-1 text-danger mb-3">
+                            <i class="bi bi-exclamation-octagon"></i>
+                        </div>
+                        <p class="lead text-secondary">Удалить все счета в песочнице?</p>
+                    </div>
+
+                    {% if total_accounts %}
+
+                    <!-- Детали аккаунта в стильном блоке -->
+                    <div class="bg-light rounded-3 p-3 mb-4 border-start border-danger border-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Колличество аккаунтов:</span>
+                            <span class="fw-bold font-monospace">{{ total_accounts }}</span>
+                        </div>           
+                    </div>
+                    
+                    <!-- Предупреждение -->
+                    <div class="alert alert-warning border-0 rounded-3 d-flex align-items-start mb-4" role="alert">
+                        <i class="bi bi-info-circle-fill me-3 mt-1 fs-5"></i>
+                        <div>
+                            <strong class="d-block mb-1 text-dark">Внимание:</strong> 
+                            Аккаунт будет окончательно закрыт в системе Tinkoff Invest API. Все виртуальные активы будут аннулированы.
+                        </div>
+                    </div>
+
+                    <form method="post" class="d-grid gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg rounded-pill fw-bold py-3 shadow-sm">
+                            Да, удалить и закрыть
+                        </button>
+                        <a href="{% url 'user:sandbox_list' %}" class="btn btn-link text-decoration-none text-muted mt-2">
+                            Вернуться назад
+                        </a>
+                    </form>
+                    {% else %}
+                        <div class="alert alert-warning border-0 rounded-3 d-flex align-items-start mb-4" role="alert">
+                            <i class="bi bi-info-circle-fill me-3 mt-1 fs-5"></i>
+                            <div>
+                                <strong class="d-block mb-1 text-dark">Внимание:</strong> 
+                                У вас нет активных аккаунтов(счетов в песочнице) в системе Tinkoff Invest API. Создайте новый аккаунт.
+                            </div>
+                        </div>
+
+                        <form method="post" class="d-grid gap-2">
+                            {% csrf_token %}
+                            <a href="{% url 'user:sandbox_list' %}" class="btn btn-outline-dark btn-lg rounded-pill fw-bold py-3 shadow-sm">
+                                Вернуться назад
+                            </a>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

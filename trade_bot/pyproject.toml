@@ -1,0 +1,20 @@
+[tool.ruff]
+# Глобальные настройки форматирования остаются здесь
+line-length = 79
+target-version = "py311" # Укажите вашу версию Python
+
+[tool.ruff.lint]
+# ВСЕ настройки линтера теперь перенесены в эту секцию
+select = ["E", "F", "I", "W"]
+ignore = []
+
+# Исключаем служебные папки и миграции Django из проверки линтером
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "migrations",
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true

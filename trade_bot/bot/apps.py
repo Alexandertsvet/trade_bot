@@ -1,0 +1,13 @@
+import logging
+
+from django.apps import AppConfig
+
+logger = logging.getLogger(__name__)
+
+
+class BotConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "bot"
+
+    def ready(self):
+        logger.info(f"СИСТЕМА УСПЕШНО ИНИЦИАЛИЗИРОВАНА, {self.name}")

@@ -1,0 +1,68 @@
+
+<div class="col-md-12 mb-4">
+    <!-- Добавлена тень (shadow-sm), более выразительные отступы (py-5 px-4) и плавный переход -->
+    <div class="h-100 p-5 bg-white border-0 shadow-sm rounded-4 position-relative overflow-hidden">
+        
+        <!-- Декоративный элемент на фоне (необязательно) -->
+        <div class="position-absolute top-0 end-0 p-3 opacity-10">
+            <i class="bi bi-wallet2 h1"></i> 
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+            <div>
+                <!-- Улучшенная типографика: уменьшенный заголовок и акцент на ID -->
+                <p class="text-uppercase fw-bold text-muted small mb-1 tracking-wider">Ваш счет</p>
+                <h2 class="display-6 fw-bold text-dark mb-0">
+                    <span class="text-primary">#</span>{{ acc.account_id }}
+                </h2>
+            </div>
+            <div>
+                <!-- Кнопка стала более аккуратной (outline + hover эффект) -->
+                <a class="btn btn-outline-danger btn-lg px-4 rounded-pill fw-semibold" 
+                   href="{% url 'user:sandbox_delete' acc.pk %}"
+                   onclick="return confirm('Вы уверены?')">
+                    <i class="bi bi-trash3 me-2"></i>Удалить
+                </a>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+            <div>
+                <div class="mt-4 pt-4">
+                    <p class="text-uppercase fw-bold text-muted small mb-1 tracking-wider">БАЛАНС</p>
+                    <div class="d-flex flex-wrap gap-5">
+
+                        {% for position in acc.money.all %}
+                            <div class="bg-light px-3 py-2 rounded-3 d-flex flex-wrap align-items-center gap-2 border mb-2">
+                                <span class="badge bg-dark text-white font-monospace fs-6">{{ position.currency|upper }}</span>
+                                
+                                <div class="d-flex align-items-center me-2">
+                                    <span class="text-muted small me-1">Доступно:</span>
+                                    <span class="text-success fw-bold fs-5">{{ position.free_money|floatformat:2 }}</span>
+                                </div>
+
+
+                                <span class="text-secondary small d-flex gap-2 border-start ps-2">
+                                    <span>Всего: <strong class="text-dark">{{ position.balance|floatformat:2 }}</strong></span>
+                                    <span class="text-muted">|</span>
+                                    <span>Заблокировано: <strong class="text-danger">{{ position.blocked|floatformat:2 }}</strong></span>
+                                </span>
+                            </div>
+                        {% empty %}
+                            <div class="alert alert-light text-muted small border-0 p-0 m-0">
+                                <i class="bi bi-info-circle me-1"></i> На счете нет средств
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div>
+                <a class="btn btn-outline-dark btn-lg" href="{% url 'user:sandbox_detail' acc.pk %}">ПОДРОБНО</a>
+            </div>
+
+        </div>
+    </div>
+</div>

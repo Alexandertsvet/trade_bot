@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="trading-container" style="max-width: 1300px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <!-- Инфо-панель аккаунта -->
+    <div style="margin-bottom: 25px; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <span style="font-size: 14px; color: #64748b; text-transform: uppercase; font-weight: 600; tracking: 0.05em;">Текущий счет</span>
+        <h2 style="margin: 5px 0 0 0; color: #0f172a; font-size: 24px;">{{ accaunt.account_id }}</h2>
+    </div>
+
+    <!-- Панель управления: Поиск и фильтры -->
+    <div style="margin-bottom: 25px; display: flex; gap: 15px;">
+        <div style="position: relative; flex-grow: 1;">
+            <input type="text" id="instrumentSearch" placeholder="🔍 Поиск по тикеру, названию или FIGI..." 
+                   style="width: 100%; padding: 14px 16px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; transition: all 0.2s; box-sizing: border-box;">
+        </div>
+    </div>
+
+    <!-- Сетка инструментов -->
+    <div id="instrumentsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        {% for instrument in instruments %}
+        <div class="instrument-card" 
+             data-uid="{{ instrument.uid }}" 
+             data-name="{{ instrument.name|lower }}" 
+             data-ticker="{{ instrument.ticker|lower }}"
+             data-figi="{{ instrument.figi|lower }}"
+             style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s; background: white; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+            
+            <div>
+                <!-- Шапка карточки: Тикер, Валюта и Тип -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <span style="font-weight: 800; font-size: 20px; color: #0f172a; letter-spacing: -0.025em;">{{ instrument.ticker }}</span>
+                        <span style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-left: 6px;">{{ instrument.currency }}</span>
+                    </div>
+                    <span style="font-size: 11px; font-weight: 700; background: #f1f5f9; color: #334155; padding: 4px 8px; border-radius: 6px; text-transform: uppercase;">
+                        {{ instrument.type }}
+                    </span>
+
+                        <form class="favorite-form" action="{% url 't_invest:toggle_favorite' instrument.uid %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-favorite js-favorite-toggle" title="Добавить в избранное">
+                                {% if instrument.uid|slugify in favorite_ids %}
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                {% else %}
+                                    <i class="bi bi-star text-muted"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+                </div>
+                
+                <!-- Название компании -->
+                <div style="color: #334155; font-size: 14px; font-weight: 500; margin-bottom: 12px; line-height: 1.4; min-height: 40px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                    {{ instrument.name }}
+                </div>
+
+
+                <!-- Технические параметры (FIGI, Лот, Биржа) -->
+                <div style="background: #f8fafc; border-radius: 8px; padding: 10px; margin-bottom: 15px; font-size: 12px; color: #64748b; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <div>FIGI: <strong style="color: #475569;">{{ instrument.figi }}</strong></div>
+                    <div>Биржа: <strong style="color: #475569;">{{ instrument.exchange }}</strong></div>
+                    <div>Лотность: <strong style="color: #475569;">{{ instrument.lot }} шт.</strong></div>
+                    <div>Шаг цены: <strong style="color: #475569;">{{ instrument.min_price_increment }}</strong></div>
+                </div>
+            </div>
+
+            <!-- Индикаторы доступности (Торговые статусы) -->
+            <div>
+                <div style="display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap;">
+                    {% if instrument.api_trade_available_flag %}
+                        <span style="font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background-color: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1;">API Доступен</span>
+                    {% else %}
+                        <span style="font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background-color: #ffffff; color: #94a3b8; border: 1px solid #e2e8f0; text-decoration: line-through;">API Блок</span>
+                    {% endif %}
+
+                    {% if instrument.short_enabled_flag %}
+                        <span style="font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background-color: #0f172a; color: #ffffff; border: 1px solid #0f172a;">Шорт</span>
+                    {% endif %}
+                </div>
+
+                <!-- Кнопка выбора -->
+                {% if instrument.buy_available_flag or instrument.sell_available_flag %}
+                    <a class="btn btn-outline-danger w-100 py-25 text-uppercase fw-bold" style="width: 100%; padding: 10px; background: #000000; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s;"
+                        href="{% url 't_invest:trading_terminal' %}">
+                        Открыть терминал
+                    </a>
+                {% else %}
+                    <button disabled style="width: 100%; padding: 10px; background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: not-allowed;">
+                        Торги недоступны
+                    </button>
+                {% endif %}
+            </div>
+
+        </div>
+        {% empty %}
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
+            Инструменты в базе данных отсутствуют.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // 1. Быстрый живой поиск по трем параметрам
+    document.getElementById('instrumentSearch').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.instrument-card');
+        
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name');
+            const ticker = card.getAttribute('data-ticker');
+            const figi = card.getAttribute('data-figi');
+            
+            if (name.includes(query) || ticker.includes(query) || figi.includes(query)) {
+                card.style.display = 'flex'; 
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // 2. Обработка фокуса и клика по карточке
+    document.querySelectorAll('.instrument-card').forEach(card => {
+        // Эффект наведения через JS
+        card.addEventListener('mouseenter', function() {
+            if (this.style.borderColor !== 'rgb(0, 0, 0)') { // Если не выбрана (проверка на черный цвет)
+                this.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.08)';
+                this.style.borderColor = '#94a3b8';
+            }
+        });
+        card.addEventListener('mouseleave', function() {
+            if (this.style.borderColor !== 'rgb(0, 0, 0)') {
+                this.style.boxShadow = '0 1px 2px rgba(0,0,0,0.02)';
+                this.style.borderColor = '#e2e8f0';
+            }
+        });
+
+        // Клик (выбор)
+        card.addEventListener('click', function() {
+            // Сбрасываем стили у всех
+            document.querySelectorAll('.instrument-card').forEach(c => {
+                c.style.borderColor = '#e2e8f0';
+                c.style.boxShadow = '0 1px 2px rgba(0,0,0,0.02)';
+                c.querySelector('.select-btn')?.style.setProperty('background', '#000000');
+            });
+
+            // Выделяем активную черным цветом
+            this.style.borderColor = '#000000'; 
+            this.style.boxShadow = '0 0 0 4px rgba(0, 0, 0, 0.1)';
+            const btn = this.querySelector('.select-btn');
+            if (btn) btn.style.background = '#334155'; // Серый графит при активации карточки
+        });
+    });
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+        document.body.addEventListener('submit', async (e) => {
+            const form = e.target.closest('.favorite-form');
+            if (!form) return;
+            
+            e.preventDefault(); // Полностью блокируем перезагрузку страницы (302)
+            
+            const button = form.querySelector('.js-favorite-toggle');
+            const icon = button.querySelector('i');
+            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        // Передаем маркер AJAX-запроса, чтобы Django вернул JsonResponse, а не редирект
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Ошибка сервера');
+                const data = await response.json();      
+                if (data.status === 'success') {
+                    // Переключаем классы иконок Bootstrap Icons на лету
+                    if (data.action === 'added') {
+                        icon.className = 'bi bi-star-fill text-warning';
+                    } else if (data.action === 'removed') {
+                        icon.className = 'bi bi-star text-muted';
+                    }
+                }
+            } catch (err) {
+                console.error('Не удалось обновить статус избранного:', err);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="card shadow-sm border border-dark-subtle" style="max-width: 480px; margin: 3rem auto; border-radius: 8px;">
+    <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-black text-uppercase tracking-wider m-0" style="letter-spacing: 2px; font-weight: 800;">T-Bank</h2>
+            
+            <p class="text-muted small text-uppercase" style="letter-spacing: 0.5px;">Инструкция по созданию токена</p>
+            <a href="https://developer.tbank.ru/invest/intro/intro/token" title="инструкция создание API KEY">https://developer.tbank.ru/invest/intro/intro/token</a>
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <!-- Глобальные ошибки формы -->
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-dark text-white rounded-1 py-2 small text-center mb-4">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Поле 1: API Токен -->
+            <div class="mb-4">
+                <label class="form-label small text-uppercase fw-bold text-secondary" style="letter-spacing: 0.5px;">API Токен</label>
+                <div class="form-field-wrapper">
+                    {{ form.access_token }}
+                </div>
+                {% if form.access_token.errors %}
+                    <div class="text-danger fw-bold small mt-1 text-uppercase" style="font-size: 0.75rem;">
+                       {{ form.access_token.errors|striptags }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Поле 2: API Токен ALGOPACK -->
+            <div class="mb-4">
+                <label class="form-label small text-uppercase fw-bold text-secondary" style="letter-spacing: 0.5px;">API Токен ALGOPACK</label>
+                <div class="form-field-wrapper">
+                    {{ form.access_token_algopack }}
+                </div>
+                {% if form.access_token_algopack.errors %}
+                    <div class="text-danger fw-bold small mt-1 text-uppercase" style="font-size: 0.75rem;">
+                        {{ form.access_token_algopack.errors|striptags }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Поле 3: Краткое описание -->
+            <div class="mb-5">
+                <label class="form-label small text-uppercase fw-bold text-secondary" style="letter-spacing: 0.5px;">Краткое описание стратегии</label>
+                <div class="form-field-wrapper">
+                    {{ form.description }}
+                </div>
+                {% if form.description.errors %}
+                    <div class="text-danger fw-bold small mt-1 text-uppercase" style="font-size: 0.75rem;">
+                        {{ form.description.errors|striptags }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Строгая черная кнопка отправки -->
+            <div class="d-grid">
+                <button class="btn btn-outline-dark btn-lg py-3 rounded-1 text-uppercase fw-bold tracking-wider" 
+                        style="font-size: 0.9rem; letter-spacing: 1px;" 
+                        type="submit">
+                    Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+{% endblock %}

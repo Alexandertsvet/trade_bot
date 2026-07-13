@@ -1,9 +1,31 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href=>Home</a>
             <div class="navbar-nav">
-                <a class="nav-link" href=></a>
-                <a class="nav-link" href=></a>
+                <a class="navbar-brand" href="{% url 'homepage:home' %}">Home</a>
+                <a class="navbar-brand" href="{% url 't_invest:accaunt_add' %}">СОЗДАТЬ АККАУНТ</a>
+                <a class="navbar-brand" href="{% url 't_invest:accaunt_list' %}">АККАУНТЫ</a>
+
+            </div>
+            <div class="navbar-nav">
+                {% with request.resolver_match.view_name as view_name %}
+                    {% if user.is_authenticated %}
+                        <a class="nav-link {% if view_name  == 'user:password_change' %}active{% endif %}" href="{%url 'user:password_change'%}">Изменить пароль</a>
+                        <a class="nav-link {% if view_name  == 'user:password_reset' %}active{% endif %}" href="{%url 'user:password_reset'%}">Восстановить пароль</a>
+                            <form method="post" action="{% url 'user:logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-link {% if view_name == 'user:logout' %}active{% endif %}" style="background: none; border: none; cursor: pointer;">
+                                    Выйти
+                                </button>
+                            </form>
+                    {% else %}
+                        <a class="nav-link {% if view_name  == 'user:login' %}active{% endif %}" href="{%url 'user:login'%}">Войти</a>
+                        <a class="nav-link
+                        {% if view_name  == 'user:signup' %}
+                        active
+                        {% endif %}"
+                        href="{% url 'user:signup' %}">Регистрация</a>
+                    {% endif %}
+                {% endwith %} 
             </div>
         </div>
 </nav>

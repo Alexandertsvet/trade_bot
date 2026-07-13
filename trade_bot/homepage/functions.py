@@ -1,7 +1,8 @@
 import requests
 from django.core.cache import cache
 
-def get_moex_index_value_direct(index:str):
+
+def get_moex_index_value_direct(index: str):
     """
     Получает значение индекса IMOEX прямым запросом к API Мосбиржи.
 
@@ -27,38 +28,34 @@ def get_moex_index_value_direct(index:str):
 
 
     """
-    cached_value = cache.get(f'moex_index_value_direct_{index}')
+    cached_value = cache.get(f"moex_index_value_direct_{index}")
     if cached_value is not None:
         return cached_value
     try:
         url = f"https://iss.moex.com/iss/engines/stock/markets/index/securities/{index}.json"
 
-
-
         params = {
-            'iss.meta': 'off',
-           
+            "iss.meta": "off",
         }
-        
+
         response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()  
-        
+        response.raise_for_status()
+
         data = response.json()
-        
-        securities_data = data.get('marketdata', {})
+
+        securities_data = data.get("marketdata", {})
         columns = securities_data.get("columns", {})
         data = securities_data.get("data", {})[0]
         securities_data = tuple(zip(columns, data))
-        
+
         if securities_data:
-           
-            last_price = securities_data 
-            
-            cache.set(f'moex_index_value_direct_{index}', last_price, 300)
+            last_price = securities_data
+
+            cache.set(f"moex_index_value_direct_{index}", last_price, 300)
             return last_price
-        
+
         return None
-        
+
     except requests.exceptions.RequestException as e:
         print(f"Ошибка запроса к Мосбирже: {e}")
         return None
