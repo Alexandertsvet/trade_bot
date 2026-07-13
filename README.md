@@ -1,7 +1,7 @@
 # trade_bot
 trade_bot
 
-Работа через t invest API, и apgopack api
+Работа через t invest API, и algopack api
 
 .env file
 # --- Django Settings ---
