@@ -25,7 +25,6 @@ class RealTimeForecaster:
             return None
 
         try:
-            # Обучаем ARMA на данных (d=1)
             model = SARIMAX(
                 df_ticker["y"],
                 order=(self.p, 1, self.q),

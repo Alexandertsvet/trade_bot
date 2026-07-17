@@ -138,6 +138,11 @@ class Command(BaseCommand):
             while True:
                 try:
                     config.refresh_from_db()
+                    quantity_sum = get_quantity_all(account, INVEST_GRPC_API_SANDBOX)
+                    self.stdout.write(
+                        self.style.SUCCESS(f"Позиций в портфеле GAZP {quantity_sum}")
+                    )
+
                     if not config.is_active:
                         self.stdout.write(
                             "Бот остановлен (is_active=False). Ожидание запуска..."

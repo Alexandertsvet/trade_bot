@@ -5,8 +5,9 @@ trade_bot
 
 .env file
 # --- Django Settings ---
-SECRET_KEY=...you api key
+SECRET_KEY=...you django_key
 SALT_KEY=...you api key
+TINKOFF_TOKEN_SANDBOX=...you api key
 DOCKER_ENV=True
 
 # --- Integrations ---
