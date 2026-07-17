@@ -38,12 +38,13 @@ CLICKHOUSE_PASSWORD=default
 
 docker compose up -d --build
 
-Создание через веб интерфейс аккаунта (один аккаунта t invest API, один пользователь user)
-http://127.0.0.1:8000/t_invest/accaunt/add/
-
 docker exec trade_bot-web-1 python manage.py makemigrations
 
 docker exec trade_bot-web-1 python3 manage.py create_db
+
+Создание через веб интерфейс аккаунта (один аккаунта t invest API, один пользователь user)
+http://127.0.0.1:8000/t_invest/accaunt/add/
+
 
 python3 manage.py download_history --secid gazp --from 2026 --till 2026
 
