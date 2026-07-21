@@ -4,6 +4,7 @@ import time
 import uuid
 from datetime import datetime
 
+from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.shortcuts import get_object_or_404
 from t_tech.invest import (
@@ -19,7 +20,7 @@ from bot.ml_models import (
     RealTimeMetaEnsemble,
 )
 from bot.models import BotConfiguration
-from data.models import FinancialInstrument
+from data.models import FinancialInstrument, TradeSignal
 from t_invest.models import (
     TinkoffAccaunt,
     SandboxPostOrderResponse,
@@ -134,7 +135,7 @@ class Command(BaseCommand):
             user = User.objects.get(pk=user_id)
             account = get_object_or_404(TinkoffAccaunt, pk=pk, user=user)
             quantity = 10
-            quantity_sum = get_quantity_all(account, INVEST_GRPC_API_SANDBOX)
+            
             while True:
                 try:
                     config.refresh_from_db()
@@ -162,6 +163,16 @@ class Command(BaseCommand):
                             secid="GAZP", window_size=200
                         )
                         result = meta_model.predict_trade_signal(df)
+
+                        TradeSignal.objects.create(
+                            tradetime=timezone.make_aware(result["tradetime"].to_pydatetime()),
+                            current_price=float(result['current_price']),
+                            signal=result['signal'],
+                            confidence=float(result['confidence']),
+                            prob_sell=float(result['prob_sell']),
+                            prob_hold=float(result['prob_hold']),
+                            prob_buy=float(result['prob_buy'])
+                        )
 
                         print(result)
                         signal = result["signal"]
@@ -320,7 +331,7 @@ class Command(BaseCommand):
                             "Ожидание получения новых данных..."
                         )
                     )
-                    time.sleep(5)
+                    time.sleep(10)
 
                 except Exception as e:
                     self.stdout.write(

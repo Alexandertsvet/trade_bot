@@ -35,6 +35,7 @@
                 <h6 class="text-muted border-bottom border-dark border-opacity-10 pb-1 mb-2">График цены</h6>
                 
                 <!-- Контейнер для виджета с учетом высоты заголовка -->
+
                 <div class="tradingview-widget-container" style="height: calc(100% - 35px); width: 100%;">
                     <div id="tradingview_chart" style="height: 100%; width: 100%;"></div>
                 </div>
@@ -143,8 +144,9 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const rawData = JSON.parse("{{ data|escapejs }}");
-    console.log("Первая свеча:", rawData[0]);
-
+    const markersData = {{ markers|safe }};
+    console.log(rawData);
+    console.log(markersData);
 
     const chartContainer = document.getElementById('tradingview_chart');
     if (!chartContainer) return;
@@ -177,10 +179,11 @@ document.addEventListener("DOMContentLoaded", function() {
         wickDownColor: '#000000',
     });
 
-
+    // 1. Загружаем данные свечей
     candlestickSeries.setData(rawData);
 
-
+    // 2. Отображаем маркеры сигналов BUY/SELL на графике
+    candlestickSeries.setMarkers(markersData);
 
     // Автоматическое изменение размера при изменении окна браузера
     window.addEventListener('resize', () => {

@@ -1,5 +1,6 @@
 import json
 import logging
+import calendar
 
 from django.conf import settings
 from django.contrib import messages
@@ -7,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import DeleteView, DetailView, ListView, View
@@ -21,6 +23,7 @@ from t_invest.forms import AccauntForm
 from t_invest.functions import save_tinkoff_portfolio
 from t_invest.models import FavoriteInstrument, TinkoffAccaunt
 from trade_bot.settings import client_clickhouse
+from data.models import TradeSignal
 
 import pandas as pd
 
@@ -211,26 +214,85 @@ class TraidingTerminal(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         """Этот метод перехватывает GET-запрос и рендерит страницу"""
+        # 1. Получаем аккаунты
         accaunt = self.get_queryset()
+        
+        # 2. Получаем свечи из ClickHouse
         df = client_clickhouse.get_latest_window(secid="GAZP", window_size=200)
         df["tradetime"] = pd.to_datetime(df["tradetime"], errors="coerce")
         df["time"] = df["tradetime"].dt.tz_localize(None)
         df["time"] = df["time"].astype("datetime64[s]").astype("int64")
+        
         rename_dict = {
             "pr_open": "open",
             "pr_high": "high",
             "pr_low": "low",
             "pr_close": "close",
         }
-        df_charts = df[
-            ["time", "pr_open", "pr_high", "pr_low", "pr_close"]
-        ].rename(columns=rename_dict)
+        df_charts = df[["time", "pr_open", "pr_high", "pr_low", "pr_close"]].rename(columns=rename_dict)
         raw_data = df_charts.reset_index(drop=True).to_dict(orient="records")
         data = json.dumps(raw_data, indent=4)
+
+        # 3. Получаем торговые сигналы и форматируем их для lightweight-charts markers
+        # Извлекаем минимальное и максимальное время свечей, чтобы отфильтровать только нужные сигналы
+        if not df.empty:
+            min_time = df["tradetime"].min()
+            max_time = df["tradetime"].max()
+            trade_signals = TradeSignal.objects.filter(tradetime__range=(min_time, max_time))
+        else:
+            trade_signals = TradeSignal.objects.all()
+
+
+        markers_list = []
+        for signal in trade_signals:
+            dt_local = timezone.localtime(signal.tradetime)
+
+            # 2. Отрезаем временную зону, делая объект naive (как это делает Pandas)
+            dt_naive = dt_local.replace(tzinfo=None)
+            # 3. ИСПРАВЛЕНИЕ: Используем calendar.timegm вместо .timestamp()
+            # Данный метод преобразует naive-время строго по эпохе UTC-0 (точно так же, как astype("int64") в Pandas)
+            signal_timestamp = calendar.timegm(dt_naive.timetuple())
+
+            # Определяем параметры отображения маркера в зависимости от типа сигнала
+            if signal.signal == 'BUY':
+                color = '#26a69a'      # Зеленый
+                position = 'belowBar'  # Под свечой
+                shape = 'arrowUp'      # Стрелка вверх
+                marker_text = (f"{signal.signal}({signal.confidence:.3f})|S:{signal.prob_sell:.3f}"
+            )
+
+            elif signal.signal == 'SELL':
+                color = '#ef5350'      # Красный
+                position = 'aboveBar'  # Над свечой
+                shape = 'arrowDown'    # Стрелка вниз
+                marker_text = (f"{signal.signal}({signal.confidence:.3f})|B:{signal.prob_buy:.3f}"
+            )
+            elif signal.signal == 'HOLD':
+                color = '#90a4ae'      # Серый для HOLD
+                position = 'inBar'
+                shape = 'circle'
+                marker_text = (
+                f"{signal.signal} ({signal.confidence:.3f}) | "
+                f"B:{signal.prob_buy:.3f} S:{signal.prob_sell:.3f}"
+                )
+
+            markers_list.append({
+                'time': signal_timestamp,
+                'position': position,
+                'color': color,
+                'shape': shape,
+                'text': marker_text,
+            })
+        
+        markers_list = sorted(markers_list, key=lambda x: x['time'])
+        markers_data = json.dumps(markers_list, indent=4)
+
+        # 4. Формируем контекст
         context = {
             "accaunt": accaunt,
             "active_accaunt": accaunt.first(),
-            "data": data,
+            "data": data,            
+            "markers": markers_data, 
         }
 
         return render(request, self.template_name, context)

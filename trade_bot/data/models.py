@@ -254,3 +254,64 @@ class FinancialInstrument(models.Model):
 
     def __str__(self):
         return f"{self.ticker} - {self.name}"
+
+
+class TradeSignal(models.Model):
+    SIGNAL_CHOICES = [
+        ('BUY', 'Buy'),
+        ('HOLD', 'Hold'),
+        ('SELL', 'Sell'),
+    ]
+
+    tradetime = models.DateTimeField(
+        verbose_name="Время торгового сигнала"
+    )
+    current_price = models.DecimalField(
+        max_digits=18,
+        decimal_places=9,
+        verbose_name="Текущая цена"
+    )
+    signal = models.CharField(
+        max_length=4, 
+        choices=SIGNAL_CHOICES, 
+        verbose_name="Сигнал"
+    )
+    confidence = models.DecimalField(
+        max_digits=5, 
+        decimal_places=4, 
+        verbose_name="Уверенность"
+    )
+    prob_sell = models.DecimalField(
+        max_digits=5, 
+        decimal_places=4, 
+        verbose_name="Вероятность продажи"
+    )
+    prob_hold = models.DecimalField(
+        max_digits=5, 
+        decimal_places=4, 
+        verbose_name="Вероятность удержания"
+    )
+    prob_buy = models.DecimalField(
+        max_digits=5, 
+        decimal_places=4, 
+        verbose_name="Вероятность покупки"
+    )
+
+    @property
+    def chart_time(self):
+        """Возвращает Unix Timestamp в секундах (целое число) для lightweight-charts."""
+        return int(self.tradetime.timestamp())
+
+    class Meta:
+        verbose_name = "Торговый сигнал"
+        verbose_name_plural = "Торговые сигналы"
+        ordering = ['tradetime']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['tradetime'], 
+                name='unique_tradetime'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.tradetime} - {self.signal} ({self.current_price})"

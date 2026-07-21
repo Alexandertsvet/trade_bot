@@ -61,7 +61,7 @@ def real_time_data(headers):
 
     payload = {}
 
-    response = requests.request("GET", url, headers=headers, data=payload)
+    response = requests.request("GET", url, headers=headers, data=payload, timeout=(5, 10))
 
     if response.status_code == 200:
         data = response.json().get("data", {}).get("data", {})
