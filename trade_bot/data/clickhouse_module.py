@@ -170,7 +170,7 @@ class ClickHouseProcessor(Client):
 
     def get_last_time(self, secid="GAZP"):
         sql = f"""
-            SELECT 
+            SELECT
                 max(tradetime)
             FROM test_trade.test_tradestats
             WHERE secid = '{secid}'

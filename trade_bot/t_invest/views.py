@@ -258,15 +258,13 @@ class TraidingTerminal(LoginRequiredMixin, View):
                 color = '#26a69a'      # Зеленый
                 position = 'belowBar'  # Под свечой
                 shape = 'arrowUp'      # Стрелка вверх
-                marker_text = (f"{signal.signal}({signal.confidence:.3f})|S:{signal.prob_sell:.3f}"
-            )
+                marker_text = (f"{signal.signal}({signal.confidence:.3f})|S:{signal.prob_sell:.3f}")
 
             elif signal.signal == 'SELL':
                 color = '#ef5350'      # Красный
                 position = 'aboveBar'  # Над свечой
                 shape = 'arrowDown'    # Стрелка вниз
-                marker_text = (f"{signal.signal}({signal.confidence:.3f})|B:{signal.prob_buy:.3f}"
-            )
+                marker_text = (f"{signal.signal}({signal.confidence:.3f})|B:{signal.prob_buy:.3f}")
             elif signal.signal == 'HOLD':
                 color = '#90a4ae'      # Серый для HOLD
                 position = 'inBar'
